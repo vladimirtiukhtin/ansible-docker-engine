@@ -1,0 +1,19 @@
+---
+
+- name: Add docker repository keys
+  ansible.builtin.rpm_key:
+    key: https://download.docker.com/linux/centos/gpg
+    state: present
+
+- name: Add docker repository
+  ansible.builtin.yum_repository:
+    state: present
+    name: "docker-ce-stable"
+    description: "Docker CE Stable - $basearch"
+    baseurl: https://download.docker.com/linux/centos/7/$basearch/stable
+    file: docker-ce
+    gpgcheck: yes
+
+- name: Update yum cache
+  ansible.builtin.yum:
+    update_cache: true

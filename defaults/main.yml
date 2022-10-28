@@ -1,0 +1,8 @@
+---
+
+#
+#
+#
+
+docker_storage_driver: default
+docker_log_driver: default

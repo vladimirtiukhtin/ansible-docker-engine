@@ -1,0 +1,33 @@
+---
+
+- name: Make sure Debian managed packages are not install
+  ansible.builtin.apt:
+    name:
+      - "docker"
+      - "docker-engine"
+      - "docker.io"
+      - "containerd"
+      - "runc"
+    update_cache: no
+    state: absent
+
+- name: Install requirements
+  ansible.builtin.apt:
+    name:
+      - "ca-certificates"
+      - "gnupg"
+    update_cache: yes
+    state: latest
+
+- name: Add docker repository key
+  ansible.builtin.apt_key:
+    url: https://download.docker.com/linux/debian/gpg
+    keyring: /etc/apt/trusted.gpg.d/docker.gpg
+    state: present
+
+- name: Add docker repository
+  ansible.builtin.apt_repository:
+    filename: docker
+    repo: "deb https://download.docker.com/linux/debian {{ ansible_distribution_release }} stable"
+    update_cache: yes
+    state: present

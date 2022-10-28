@@ -1,0 +1,19 @@
+---
+
+- include_tasks: "{{ ansible_os_family | lower() }}.yml"
+
+- name: Install docker packages
+  package:
+    name:
+      - docker-ce
+      - docker-ce-cli
+      - containerd.io
+    state: latest
+  notify:
+    - Restart docker service
+
+- name: Start docker service
+  service:
+    name: docker
+    state: started
+    enabled: true
