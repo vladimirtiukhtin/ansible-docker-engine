@@ -1,0 +1,32 @@
+- name: Create systemd drop-in directory
+  ansible.builtin.file:
+    name: /etc/systemd/system/docker.service.d
+    state: directory
+    owner: root
+    group: root
+    mode: 0755
+    force: true
+
+- name: Put systemd drop-in to remove CMD flags from docker executable # https://gist.github.com/styblope/dc55e0ad2a9848f2cc3307d4819d819f
+  ansible.builtin.copy:
+    dest: /etc/systemd/system/docker.service.d/override.conf
+    owner: root
+    group: root
+    mode: 0644
+    content: |
+      [Service]
+      ExecStart=
+      ExecStart=/usr/bin/dockerd
+  register: systemd_drop_in
+  notify: Restart docker
+
+- name: Reload systemd
+  ansible.builtin.command:
+    cmd: systemctl daemon-reload
+  when: systemd_drop_in.changed
+
+- name: Disable socket activation
+  ansible.builtin.systemd:
+    name: docker.socket
+    state: stopped
+    enabled: false

@@ -3,17 +3,28 @@
 - include_tasks: "{{ ansible_os_family | lower() }}.yml"
 
 - name: Install docker packages
-  package:
+  ansible.builtin.package:
     name:
-      - docker-ce
-      - docker-ce-cli
-      - containerd.io
+      - "docker-ce"
+      - "docker-ce-cli"
+      - "containerd.io"
+      - "docker-buildx-plugin"
+      - "docker-compose-plugin"
     state: latest
-  notify:
-    - Restart docker service
+  notify: Restart docker
+
+- name: Configure docker daemon
+  ansible.builtin.copy:
+    dest: /etc/docker/daemon.json
+    content: "{{ docker_daemon_json | to_json }}"
+    force: true
+  notify: Restart docker
+
+- include_tasks: "systemd.yml"
+  when: ansible_service_mgr == "systemd"
 
 - name: Start docker service
-  service:
+  ansible.builtin.service:
     name: docker
     state: started
     enabled: true

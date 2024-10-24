@@ -1,19 +1,29 @@
 ---
 
-- name: Add docker repository keys
-  ansible.builtin.rpm_key:
-    key: https://download.docker.com/linux/centos/gpg
-    state: present
+- name: Make sure Rocky managed packages are not installed
+  ansible.builtin.dnf:
+    name:
+      - "docker"
+      - "docker-client"
+      - "docker-client-latest"
+      - "docker-common"
+      - "docker-latest"
+      - "docker-latest-logrotate"
+      - "docker-logrotate"
+      - "docker-engine"
+    update_cache: no
+    state: absent
 
 - name: Add docker repository
-  ansible.builtin.yum_repository:
-    state: present
-    name: "docker-ce-stable"
-    description: "Docker CE Stable - $basearch"
-    baseurl: https://download.docker.com/linux/centos/7/$basearch/stable
-    file: docker-ce
-    gpgcheck: yes
-
-- name: Update yum cache
-  ansible.builtin.yum:
-    update_cache: true
+  community.general.ini_file:
+    path: /etc/yum.repos.d/docker.repo
+    section: docker-ce-stable
+    option: "{{ item.option }}"
+    value: "{{ item.value }}"
+    create: yes
+  loop:
+    - { "option": "name", "value": "Docker CE Stable - $basearch" }
+    - { "option": "baseurl", "value": "https://download.docker.com/linux/centos/$releasever/$basearch/stable" }
+    - { "option": "enabled", "value": "1" }
+    - { "option": "gpgcheck", "value": "1" }
+    - { "option": "gpgkey", "value": "https://download.docker.com/linux/centos/gpg" }

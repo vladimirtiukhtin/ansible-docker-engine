@@ -1,11 +1,12 @@
 ---
 
-- name: Make sure Debian managed packages are not install
+- name: Make sure Debian managed packages are not installed
   ansible.builtin.apt:
     name:
-      - "docker"
-      - "docker-engine"
       - "docker.io"
+      - "docker-compose"
+      - "docker-doc"
+      - "podman-docker"
       - "containerd"
       - "runc"
     update_cache: no
@@ -22,12 +23,12 @@
 - name: Add docker repository key
   ansible.builtin.apt_key:
     url: https://download.docker.com/linux/debian/gpg
-    keyring: /etc/apt/trusted.gpg.d/docker.gpg
+    keyring: /etc/apt/keyrings/docker.gpg
     state: present
 
 - name: Add docker repository
   ansible.builtin.apt_repository:
     filename: docker
-    repo: "deb https://download.docker.com/linux/debian {{ ansible_distribution_release }} stable"
+    repo: "deb [arch=amd64 signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/debian {{ ansible_distribution_release }} stable"
     update_cache: yes
     state: present
